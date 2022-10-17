@@ -1,0 +1,22 @@
+{
+    "companyMappings": [
+        {
+            "EmaCompanyPublicId": "07d6630b-da37-41ae-9ec5-f3767f1f7a96",
+            "AutoTaskContractId": "29684188"
+        }
+    ],
+    "licenseProductMappings" : [
+        {
+            "EmaLicenseProductCode": 111,
+            "AutotaskServiceId": 16
+        },
+        {
+            "EmaLicenseProductCode": 211,
+            "AutotaskServiceId": 17
+        }
+    ]
+
+    
+        
+    
+}
