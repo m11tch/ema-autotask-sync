@@ -18,6 +18,7 @@ to get the relevant information to create mappings you can use:
 see mappings.json for example
 
 once mappings are set-up running ema-SyncCompanies will sync data to Autotask PSA.
+see sync.ps1 for example on how to run/configure needed variables
 
 script in action: 
 ![adjustments](adjustments.png)
