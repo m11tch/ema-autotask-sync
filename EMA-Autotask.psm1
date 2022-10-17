@@ -23,7 +23,7 @@ function autotask-ContractServiceadjustments {
 "@
     
     
-    Invoke-RestMethod -Method Post -Headers $headers -Body $body -uri https://webservices2.autotask.net/ATServicesRest/V1.0/ContractServiceAdjustments -ContentType 'application/json'
+    Invoke-RestMethod -Method Post -Headers $headers -Body $body -uri $autotaskBaseUri/ATServicesRest/V1.0/ContractServiceAdjustments -ContentType 'application/json'
     
 
 }
@@ -51,7 +51,7 @@ $headers = @{
     "ApiIntegrationCode" = "$autotaskApiIntegrationCode"
 }
 
-$autotaskCompanies = Invoke-RestMethod -Method Get -Headers $headers https://webservices2.autotask.net/ATServicesRest/v1.0/Companies/query -Body $body
+$autotaskCompanies = Invoke-RestMethod -Method Get -Headers $headers -Uri $autotaskBaseUri/ATServicesRest/v1.0/Companies/query -Body $body
 #Loop through the companies
 Write-Host("Printing Companies")
 foreach ($autotaskCompany in $autotaskCompanies.items) {
@@ -84,7 +84,7 @@ function autotask-GetContracts {
         "Secret" = "$autotaskSecret"
         "ApiIntegrationCode" = "$autotaskApiIntegrationCode"
     }   
-    $autotaskContracts = Invoke-RestMethod -Method Get -Headers $headers https://webservices2.autotask.net/ATServicesRest/v1.0/Contracts/query -Body $body
+    $autotaskContracts = Invoke-RestMethod -Method Get -Headers $headers -Uri $autotaskBaseUri/ATServicesRest/v1.0/Contracts/query -Body $body
     #Loop through the contracts
     Write-Host("Printing contracts:")
     foreach ($autotaskContract in $autotaskContracts.items){
@@ -119,7 +119,7 @@ $body = @{
 }
 
 
-$autotaskServices= Invoke-RestMethod -Method Get -Headers $headers https://webservices2.autotask.net/ATServicesRest/v1.0/Services/query -Body $body
+$autotaskServices= Invoke-RestMethod -Method Get -Headers $headers -Uri $autotaskBaseUri/ATServicesRest/v1.0/Services/query -Body $body
 #Loop through the services
 
 Write-Host("Printing services:")
@@ -163,7 +163,7 @@ $body = @{
 }
 
 
-$autotaskContractServices = Invoke-RestMethod -Method Get -Headers $headers https://webservices2.autotask.net/ATServicesRest/v1.0/ContractServiceUnits/query -Body $body
+$autotaskContractServices = Invoke-RestMethod -Method Get -Headers $headers -Uri $autotaskBaseUri/ATServicesRest/v1.0/ContractServiceUnits/query -Body $body
 #Loop through the contracts
 $autotaskContractServices | ConvertTo-Json
 return $autotaskcontractServices.items[0]
