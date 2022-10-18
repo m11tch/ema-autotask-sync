@@ -240,11 +240,12 @@ $companyPublicId = $company.publicId
     $contractID = $mappings.companyMappings | Where-Object -Property "EmaCompanyPublicId" -eq "$companyPublicId"
     #$contractID
     if ($null -ne $contractID) {
-        Write-Host("Comparing count in AutoTask") -ForegroundColor Cyan
+
          #Find Autotask Service ID for current license 
         $serviceID = $mappings.licenseProductMappings | Where-Object -Property "EmaLicenseProductCode" -eq $licenseDetails.ProductCode
 
         if ($null -ne $serviceID) {
+            Write-Host("Comparing count in AutoTask") -ForegroundColor Cyan
             $AutotaskUnits = autotask-getContractServiceUnits -ContractID $contractID.AutoTaskContractId -ServiceID $ServiceID.AutotaskServiceId
             #Write-Host("ContractID: " + $contractID + " ServiceId: " + $serviceID)
             #$AutotaskUnits.units
@@ -274,6 +275,8 @@ $companyPublicId = $company.publicId
                 Write-Error("failed to get data from Autotask")
             }
 
+        } else { 
+            Write-Host("License not mapped to any service") -ForegroundColor DarkYellow
         }
 
     } else {
