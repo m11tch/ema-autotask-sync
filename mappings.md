@@ -1,4 +1,4 @@
-#Howto: Creating mappings
+# Howto: Creating mappings
 
 **Before you can create mappings, please make sure you meet the following pre-requisites:**
 1. Companies need to have an active contract in Autotask PSA
