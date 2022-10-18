@@ -29,6 +29,9 @@ function autotask-ContractServiceadjustments {
 }
 
 function autotask-GetCompanies {
+    param(
+        $print
+    )
 #Get all companies from autotask
 $body = @{
     search =@"
@@ -53,11 +56,15 @@ $headers = @{
 
 $autotaskCompanies = Invoke-RestMethod -Method Get -Headers $headers -Uri $autotaskBaseUri/ATServicesRest/v1.0/Companies/query -Body $body
 #Loop through the companies
-Write-Host("Printing Companies")
-foreach ($autotaskCompany in $autotaskCompanies.items) {
-   Write-Host("companyId: " + $autotaskCompany.Id + " companyName: " + $autotaskCompany.companyName) 
-    #Add check for mapped companies, nothing else is really needed here
+if ($null -ne $print) {
+    Write-Host("Printing Companies")
+    foreach ($autotaskCompany in $autotaskCompanies.items) {
+       Write-Host("companyId: " + $autotaskCompany.Id + " companyName: " + $autotaskCompany.companyName) 
+        #Add check for mapped companies, nothing else is really needed here
+    }
 }
+
+return $autotaskCompanies
 }
 
 
@@ -86,6 +93,8 @@ function autotask-GetContracts {
     }   
     $autotaskContracts = Invoke-RestMethod -Method Get -Headers $headers -Uri $autotaskBaseUri/ATServicesRest/v1.0/Contracts/query -Body $body
     #Loop through the contracts
+    $autoTaskCompanies = autotask-GetCompanies
+
     Write-Host("Printing contracts:")
     foreach ($autotaskContract in $autotaskContracts.items){
         $companyName = $autoTaskCompanies.items | Where-Object -Property Id -eq $autotaskContract.companyID

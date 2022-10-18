@@ -3,6 +3,10 @@
         {
             "EmaCompanyPublicId": "07d6630b-da37-41ae-9ec5-f3767f1f7a96",
             "AutoTaskContractId": "29684188"
+        }, 
+        {
+            "EmaCompanyPublicId": "f160f3d6-1a73-48ec-9f17-16e4eb1c4874",
+            "AutoTaskContractId": "29684190"
         }
     ],
     "licenseProductMappings" : [
