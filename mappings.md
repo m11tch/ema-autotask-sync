@@ -14,18 +14,21 @@
 **Step 2: Getting the autotaskContractId**
 1. Run autotask-getContracts
 2. find the contractId of the contract we want to map:
+
 ![autotaskContractId](images/autotaskContractId.png)
 3. in our case it is: 29684190
 
 **Step 3: Creating the mapping**
 1. open mappings.json and use the information from previous steps to create the mapping
 2. Example (highlighted lines were added): 
+
 ![CompanyMappingExample](images/CompanyMappingExample.png)
 
 ## Mapping EMA License Types to Autotask Services
 **Step 1: Getting the EmaLicenseProductCode**
 1. run ema-syncCompanies
 2. Find the EmaLicenseProductCode for the license you want to map:
+
 ![EmaLicenseProductCode](images/emaLicenseProductCode.png)
 3. in our case it is 2015
 
@@ -38,4 +41,5 @@
 **Step 3: Creating the mapping**
 1. open mappings.json and use the information from previous steps to create the mapping
 2. Example (highlighted lines were added)
+
 ![LicenseMappingExample](images/LicenseMappingExample.png)
