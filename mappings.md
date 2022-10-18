@@ -8,7 +8,9 @@
 **Step 1: Getting the EmaCompanyPublicId**
 1. Run ema-syncCompanies
 2. Find the emaCompanyPublicId of the company you want to map:
+
 ![emaCompanyPublicId](images/emaCompanyPublicId.png)
+
 3. in our case it is: f160f3d6-1a73-48ec-9f17-16e4eb1c4874
 
 **Step 2: Getting the autotaskContractId**
@@ -16,6 +18,7 @@
 2. find the contractId of the contract we want to map:
 
 ![autotaskContractId](images/autotaskContractId.png)
+
 3. in our case it is: 29684190
 
 **Step 3: Creating the mapping**
@@ -30,12 +33,15 @@
 2. Find the EmaLicenseProductCode for the license you want to map:
 
 ![EmaLicenseProductCode](images/emaLicenseProductCode.png)
+
 3. in our case it is 2015
 
 **Step 2: Getting the AutotaskServiceId**
 1. run autotask-getServices
 2. find the AutotaskServiceId for the service you want to map:
+
 ![AutotaskServiceId](images/autotaskServiceId.png)
+
 3. in our case it is 11
 
 **Step 3: Creating the mapping**
