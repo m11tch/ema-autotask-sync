@@ -12,5 +12,5 @@ Set-Variable -Name autotaskSecret -scope Script -Value "secrethere"
 Set-Variable -Name autotaskApiIntegrationCode -scope Script -Value "integrationcodehere"
 
 
-ema-syncCompanies
+Invoke-EmaSyncCompanies
 #autotask-getServices
