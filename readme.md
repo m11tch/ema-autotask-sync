@@ -1,4 +1,5 @@
 # Powershell script for syncing EMA License usage to Autotask PSA Contracts
+Script aims to provide the billing functionality of https://www.eset.com/int/business/partner/integration/download-autotask-plugin/ for customers using ESET PROTECT Cloud
 
 **Tested with Powershell 7.2.6**
 
