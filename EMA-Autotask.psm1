@@ -225,6 +225,37 @@ function Get-EmaMasterCompanyID {
     Return $CurrentUserResponse.company.companyId
 }
 
+function Get-EmaCompanyLicenses {
+    param(
+        $CompanyPublicId
+    )
+    $Body = @"
+    {
+        "skip": 0,
+        "take": 100,
+        "customerId": "$CompanyPublicId"
+    }
+"@
+
+    $LicensesResponse = Invoke-restMethod -Uri 'https://mspapi.eset.com/api/Search/Licenses' -method Post -Headers $Headers -Body $Body -contentType 'application/json'
+    $PublicLicenseId = $LicensesResponse.Search.publicLicenseKey
+
+    return $PublicLicenseId
+}
+
+function Get-EmaLicenseDetails {
+    param(
+        $PublicLicenseKey
+    )
+    $Body = @"
+    {
+        "publicLicenseKey": "$PublicId"
+    } 
+"@
+    Write-Debug($body)
+    $LicenseDetails = Invoke-Restmethod -Uri 'https://mspapi.eset.com/api/License/Detail' -method Post -Headers $Headers -Body $Body -contentType 'application/json'
+    Return $LicenseDetails
+}
 function Invoke-EmaSyncCompanies {
     param(
         [switch]$DryRun
@@ -236,28 +267,8 @@ function Invoke-EmaSyncCompanies {
         #Get Activated Devices from companies
         Write-Host("used seats for Customer: " + $Company.name + " company ID: " + $company.publicId) -foregroundColor Green
 
-        $CompanyPublicId = $Company.publicId
-
-        $Body = @"
-        {
-            "skip": 0,
-            "take": 100,
-            "customerId": "$CompanyPublicId"
-        }
-"@
-
-        $ActivatedDevicesResponse = Invoke-restMethod -Uri 'https://mspapi.eset.com/api/Search/Licenses' -method Post -Headers $Headers -Body $Body -contentType 'application/json'
-        $PublicLicenseId = $ActivatedDevicesResponse.Search.publicLicenseKey
-
-
-        foreach ($PublicId in $PublicLicenseId) {
-            $Body = @"
-            {
-                "publicLicenseKey": "$PublicId"
-            } 
-"@
-            Write-Host($body)
-            $LicenseDetails = Invoke-Restmethod -Uri 'https://mspapi.eset.com/api/License/Detail' -method Post -Headers $Headers -Body $Body -contentType 'application/json'
+        foreach ($PublicId in (Get-EmaCompanyLicenses -CompanyPublicId $Company.publicId)) {
+            $LicenseDetails = (Get-EmaLicenseDetails -PublicLicenseKey $PublicId)
             Write-Host($LicenseDetails.productName + " - " + $LicenseDetails.publicLicenseKey + " seats:" + $LicenseDetails.usage + " productCode: " + $LicenseDetails.productCode)
 
             #Find Autotask Contract for this company
@@ -311,6 +322,96 @@ function Invoke-EmaSyncCompanies {
     }
 }
 
+Function Invoke-MSPAuth {
+    param(
+        [ValidateNotNull()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.Credential()]
+        $Credentials = [System.Management.Automation.PSCredential]::Empty
+    )
 
+    $EMAUsername = $Credentials.UserName
+    $EMAPassword = $Credentials.GetNetworkCredential().Password
+
+    $Req1 = Invoke-RestMethod -Uri "https://msp.eset.com/" -SessionVariable "MSPWebSession" -Method Get 
+
+    $String = ""
+    foreach ($Input in $Req1.html.body.form.input) {
+        $String += $Input.name + "=" + $Input.value + "&"
+    }
+    
+    $Headers = @{
+        "Content-Type" = "application/x-www-form-urlencoded"
+    }   
+
+    $Req2 = Invoke-RestMethod -Uri "https://identity.eset.com/connect/authorize" -Headers $Headers -Body $String -WebSession $MSPWebSession  -Method Post
+    Write-Debug($Req2)
+
+    $AuthRequestBody = @"
+
+    {
+        "email":"$EMAUsername",
+        "password":"$EMAPassword",
+        "returnUrl":"/connect/authorize/callback?client_id=Eset.EMA&redirect_uri=https%3A%2F%2Fmsp.eset.com%2Fsignin-oidc&response_type=id_token&scope=openid%20profile%20eset_id%20email&response_mode=form_post&nonce=638037494342872703.ZjY2ZGVhZmItNTg0OS00YjY4LWI1MjItMDdiYTUwMThiYjBhMTAwOGE0NGEtNTA0Ni00NTQ2LTk4NjctYTVhM2VjY2NjMDVh&state=CfDJ8Nnqx--2_JFPowt7UuOn-xONtIG2keuTLqVbrjfhlqenUEL5SwohdOAIFiddj6olw6bquyRMfRbNSwzGNrMjeFOseIlFLmXZpkkFKn4i_nXMR2loTaFZIKH3g4zLQUBPma6UFqo1okXvGCKfA8ketVrGYERPVZh6s-9tR0uYqLriR3z6TOrOyqOQOpoGw81DwSGFF6nAevx8Hzfa49ojRW66jyiJscjW6WMyNCGtBipbRK_AeFzRUN6_kpAV2F2VemfwHZXQ860v2mdqO11QJ8gn83DqBQd1LRfL-kPXTYjL"
+    }
+"@
+
+
+    $Headers = @{
+        "Content-Type" = "application/json"
+    }
+    $AuthReq = Invoke-RestMethod -uri "https://identity.eset.com/api/login/pwd" -Method Post -Headers $Headers -WebSession $MSPWebSession -Body $AuthRequestBody 
+    Write-debug($AuthReq)
+
+    $Req3 = Invoke-Restmethod -uri "https://identity.eset.com/connect/authorize/callback?$String" -Method Get -WebSession $MSPWebSession 
+
+    $String = ""
+    foreach ($Input in $Req3.html.body.form.input) {
+        $String += $Input.name + "=" + $Input.value + "&"
+    }
+
+    $Headers = @{
+        "Content-Type" = "application/x-www-form-urlencoded"
+    }
+    $Req4 = Invoke-RestMethod -uri "https://msp.eset.com/signin-oidc" -Method Post -WebSession $MSPWebSession -Body $string -Headers $Headers 
+    Write-Debug($Req4)
+
+    Set-Variable -Scope Script -Name MSPWebSession -Value $MSPWebSession
+}
+
+Function Get-MSPActivatedDevices {
+    param(
+        $CompanyPublicId
+    )
+    $ActivatedDevicesBody = @"
+    {
+        "ContinuationToken":null,
+        "ItemsPerPage":20,
+        "PublicLicenseKey":null,
+        "LicenseProductCode":null,
+        "SearchColumn":1,
+        "SearchColumnContains":null,
+        "CompanyPublicId":"$CompanyPublicId",
+        "SortColumn":null,
+        "SortDescending":null,
+        "Statuses":null,
+        "IgnoreLicensePool":true,
+        "ExtendQuery":
+        {
+            "skip":0,
+            "take":5000,
+            "filters":{},
+            "orderBy":0,
+            "orderAsc":true,
+            "publicId":null
+        }
+    }
+"@
+    $Headers = @{
+        "Content-Type" = "application/json"
+    }
+    $ActivatedDevicesReq = Invoke-RestMethod -Uri "https://msp.eset.com/api/seats/search" -Method Post -Headers $Headers -WebSession $MSPWebSession -Body $ActivatedDevicesBody -Proxy http://127.0.0.1:8081 -SkipCertificateCheck
+    $ActivatedDevicesReq.Units.Applications
+}
 
 
