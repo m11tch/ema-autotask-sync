@@ -111,7 +111,7 @@ function Get-autotaskServices {
         "Secret" = "$AutotaskSecret"
         "apiIntegrationCode" = "$AutotaskApiIntegrationCode"
     }
-#Get services, These will mapped to eSET pRODUCTS. 
+#Get services, These will mapped to ESET pRODUCTS. 
 $Body = @{
     search =@"
     {
@@ -226,6 +226,9 @@ function Get-EmaMasterCompanyID {
 }
 
 function Invoke-EmaSyncCompanies {
+    param(
+        [switch]$DryRun
+    )
 
     $Companies = Get-EmaCompanies -MasterCompanyId (Get-EmaMasterCompanyID)
 
@@ -272,22 +275,28 @@ function Invoke-EmaSyncCompanies {
                     if ($null -ne $AutotaskUnits) {
                         $Adjustment = ($LicenseDetails.usage - $AutotaskUnits.units)
                         if ($LicenseDetails.usage -gt $AutotaskUnits.units){
-                            Write-Host("eSET Count higher than Autotask, adjustment to make: " + $Adjustment)
-                            Write-Host("Making Adjustment in autotask") -foregroundColor Green
-                            Set-AutotaskContractServiceadjustments -ServiceID $ServiceID.autotaskServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
+                            Write-Host("ESET Count higher than Autotask, adjustment to make: " + $Adjustment)
+                            if (!$DryRun) {
+                                Write-Host("Making Adjustment in autotask") -foregroundColor Green
+                                Set-AutotaskContractServiceadjustments -ServiceID $ServiceID.autotaskServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
+                            }
+
                         } 
                         if ($LicenseDetails.usage -lt $AutotaskUnits.units) {
-                            Write-Host("eSET Count lower than Autotask, adjustment to make: " + $Adjustment)
-                            if ($AutotaskUnits.units -eq 1) {
-                                Write-Host("autotaskCount cannot be 0, skipping") -foregroundColor darkRed
-                            } else {
-                                write-Host("Making adjustment in autotask") -foregroundColor Green
-                                Set-AutotaskContractServiceadjustments -erviceID $ServiceID.autotaskServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
-                            
+                            Write-Host("ESET Count lower than Autotask, adjustment to make: " + $Adjustment)
+                            if (!$DryRun) {
+                                if ($AutotaskUnits.units -eq 1) {
+                                    Write-Host("AutotaskCount cannot be 0, skipping") -foregroundColor darkRed
+                                } else {
+                                    write-Host("Making adjustment in autotask") -foregroundColor Green
+                                    Set-AutotaskContractServiceadjustments -erviceID $ServiceID.autotaskServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
+                                
+                                }
                             }
+
                         }
                         if ($LicenseDetails.usage -eq $AutotaskUnits.units) {
-                            Write-Host("eSET Count matches Autotask Count, no update needed")
+                            Write-Host("ESET Count matches Autotask Count, no update needed")
                         }
                     } else { 
                         Write-Error("failed to get data from Autotask")

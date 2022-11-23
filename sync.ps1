@@ -11,6 +11,9 @@ Set-Variable -Name autotaskUsername -scope Script -Value "usernamehere"
 Set-Variable -Name autotaskSecret -scope Script -Value "secrethere"
 Set-Variable -Name autotaskApiIntegrationCode -scope Script -Value "integrationcodehere"
 
-
+Invoke-EmaAuthenticate
 Invoke-EmaSyncCompanies
+#If you don't want to make changes in autotask you can execute: 
+#Invoke-EmaSyncCompanies -DryRun
+
 #autotask-getServices
