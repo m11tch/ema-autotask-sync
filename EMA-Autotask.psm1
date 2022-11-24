@@ -345,6 +345,7 @@ function Invoke-EmaSyncCompaniesExperimental {
             #Find Activated devices count for mapped products
             $ActivatedDevicesPerServiceCount = @{}
 
+
             foreach ($Product in $Mappings.ProductServiceMappings) {
                 
                 #Get Count of activated devices for this product
@@ -353,19 +354,22 @@ function Invoke-EmaSyncCompaniesExperimental {
                 Write-Host("Number of activated " + $EsetProductName + ": " + $FilteredActivatedDevices.Count)
                 #Store Activated devices in relevant service for later use
                 $AutotaskServiceId = $Product.AutotaskServiceId
-                $ActivatedDevicesPerServiceCount.$AutotaskServiceId += $FilteredActivatedDevices.Count
-                #$ActivatedDevicesPerServiceCount
+                #Only fill hashtable if there are activated endpoints
+                if ($FilteredActivatedDevices.Count -ne 0) {
+                    $ActivatedDevicesPerServiceCount.$AutotaskServiceId += $FilteredActivatedDevices.Count                    
+                }
             }
 
             #Check if Autotask Contracts need updating:
             foreach ($ServiceId in $ActivatedDevicesPerServiceCount.Keys) {
                 
                 Write-Host("Comparing count in autoTask") -foregroundColor Cyan
-                Write-Host("ContractId :" + $ContractID.AutoTaskContractID + " ServiceID:" + $ServiceId)
+                Write-Host("ContractId :" + $ContractID.AutoTaskContractID + " ServiceID: " + $ServiceId)
                 $AutotaskUnits = Get-AutotaskContractServiceUnits -ContractID $ContractID.autoTaskContractID -serviceID $ServiceId
                 
                 if ($null -ne $AutotaskUnits) {
                     $Adjustment = ($ActivatedDevicesPerServiceCount[$ServiceId] - $AutotaskUnits.units)
+                    $AutotaskUnitds
                     Write-Host("ESET Count: " + $ActivatedDevicesPerServiceCount[$ServiceId] + " Autotask Count: " + $AutotaskUnits.units)
                     if ($ActivatedDevicesPerServiceCount[$ServiceId] -gt $AutotaskUnits.units) {
                         Write-Host("ESET Count higher than Autotask, adjustment to make: " + $Adjustment)
