@@ -1,7 +1,7 @@
 {
     "companyMappings": [
         {
-            "EmaCompanyPublicId": "07d6630b-da37-41ae-9ec5-f3767f1f7a96",
+            "EmaCompanyPublicId": "b3991cba-e3a6-45d6-b260-201139220069",
             "AutoTaskContractId": "29684188"
         }, 
         {
@@ -16,6 +16,16 @@
         },
         {
             "EmaLicenseProductCode": 211,
+            "AutotaskServiceId": 17
+        }
+    ],
+    "ProductServiceMappings" : [
+        {
+            "EsetProductName": "ESET Endpoint Security for Windows",
+            "AutotaskServiceId": 16
+        },
+        {
+            "EsetProductName": "ESET Inspect",
             "AutotaskServiceId": 17
         }
     ]
