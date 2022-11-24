@@ -361,7 +361,7 @@ function Invoke-EmaSyncCompaniesExperimental {
             foreach ($ServiceId in $ActivatedDevicesPerServiceCount.Keys) {
                 
                 Write-Host("Comparing count in autoTask") -foregroundColor Cyan
-                Write-Host("ContractId :" + $ContractID.AutoTaskContractID + " ServiceID :" + $ServiceId)
+                Write-Host("ContractId :" + $ContractID.AutoTaskContractID + " ServiceID:" + $ServiceId)
                 $AutotaskUnits = Get-AutotaskContractServiceUnits -ContractID $ContractID.autoTaskContractID -serviceID $ServiceId
                 
                 if ($null -ne $AutotaskUnits) {
