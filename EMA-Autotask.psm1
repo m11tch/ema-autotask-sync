@@ -366,6 +366,7 @@ function Invoke-EmaSyncCompaniesExperimental {
                 
                 if ($null -ne $AutotaskUnits) {
                     $Adjustment = ($ActivatedDevicesPerServiceCount[$ServiceId] - $AutotaskUnits.units)
+                    Write-Host("ESET Count: " + $ActivatedDevicesPerServiceCount[$ServiceId] + " Autotask Count: " + $AutotaskUnits.units)
                     if ($ActivatedDevicesPerServiceCount[$ServiceId] -gt $AutotaskUnits.units) {
                         Write-Host("ESET Count higher than Autotask, adjustment to make: " + $Adjustment)
                         if (!$DryRun) {
@@ -373,7 +374,7 @@ function Invoke-EmaSyncCompaniesExperimental {
                             Set-AutotaskContractServiceadjustments -ServiceID $Service -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
                         }
                     }
-                    if ($ActivatedDevicesPerServiceCount[$Service] -lt $AutotaskUnits.units) {
+                    if ($ActivatedDevicesPerServiceCount[$ServiceId] -lt $AutotaskUnits.units) {
                         Write-Host("ESET Count lower than Autotask, adjustment to make: " + $Adjustment)
                         if (!$DryRun) {
                             if ($AutotaskUnits.units -eq 1) {
@@ -384,7 +385,7 @@ function Invoke-EmaSyncCompaniesExperimental {
                             }
                         }  
                     }
-                    if ($LicenseDetails.usage -eq $AutotaskUnits.units) {
+                    if ($ActivatedDevicesPerServiceCount[$ServiceId] - $LicenseDetails.usage -eq $AutotaskUnits.units) {
                              Write-Host("ESET Count matches Autotask Count, no update needed")
                     }
                 } else { 
