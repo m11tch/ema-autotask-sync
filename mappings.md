@@ -6,7 +6,7 @@
 
 ## Mapping EMA Companies to Autotask PSA Contracts
 **Step 1: Getting the EmaCompanyPublicId**
-1. Run ema-syncCompanies
+1. Run Invoke-EmaSyncCompanies
 2. Find the emaCompanyPublicId of the company you want to map:
 
 ![emaCompanyPublicId](images/emaCompanyPublicId.png)
@@ -14,7 +14,7 @@
 3. in our case it is: f160f3d6-1a73-48ec-9f17-16e4eb1c4874
 
 **Step 2: Getting the autotaskContractId**
-1. Run autotask-getContracts
+1. Run Get-autotaskContracts
 2. find the contractId of the contract we want to map:
 
 ![autotaskContractId](images/autotaskContractId.png)
@@ -29,7 +29,7 @@
 
 ## Mapping EMA License Types to Autotask Services
 **Step 1: Getting the EmaLicenseProductCode**
-1. run ema-syncCompanies
+1. run Invoke-EmaSyncCompanies
 2. Find the EmaLicenseProductCode for the license you want to map:
 
 ![EmaLicenseProductCode](images/emaLicenseProductCode.png)
@@ -37,7 +37,7 @@
 3. in our case it is 2015
 
 **Step 2: Getting the AutotaskServiceId**
-1. run autotask-getServices
+1. run Get-autotaskServices
 2. find the AutotaskServiceId for the service you want to map:
 
 ![AutotaskServiceId](images/autotaskServiceId.png)
@@ -65,7 +65,7 @@ note: this is only used for Invoke-EmaSyncCompaniesExperimental
 3. in our case it is "ESET Endpoint Security for Windows"
 
 **Step 2: Getting the AutotaskServiceId**
-1. run autotask-getServices
+1. run Get-autotaskServices
 2. find the AutotaskServiceId for the service you want to map:
 
 ![AutotaskServiceId](images/autotaskServiceId.png)
