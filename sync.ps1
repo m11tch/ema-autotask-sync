@@ -16,4 +16,8 @@ Invoke-EmaSyncCompanies
 #If you don't want to make changes in autotask you can execute: 
 #Invoke-EmaSyncCompanies -DryRun
 
-#autotask-getServices
+#If you want to use mapping based on Activated device product name instead of license type (this allows you to map individual products within a bundle license to different services e.g. ESET Server Security to service X and ESET Endpoint Security to Service Y)
+#Invoke-EmaSyncCompaniesExperimental
+#If you don't want to make changes in autotask you can execute: 
+#Invoke-EmaSyncCompanies -DryRun
+
