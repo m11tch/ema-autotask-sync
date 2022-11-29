@@ -20,5 +20,8 @@ See mappings.json for example. More detailed instructions can be found in [mappi
 once mappings are set-up running Invoke-EmaSyncCompanies will sync data to Autotask PSA.
 see sync.ps1 for example on how to run/configure needed variables
 
+If you want to use mapping based on Activated device product name instead of license type (this allows you to map individual products within a bundle license to different services e.g. ESET Server Security to service X and ESET Endpoint Security to Service Y)
+use Invoke-EmaSyncCompaniesExperimental instead of Invoke-EmaSyncCompanies
+
 script in action: 
 ![adjustments](images/adjustments.png)
