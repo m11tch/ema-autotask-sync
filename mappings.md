@@ -49,3 +49,31 @@
 2. Example (highlighted lines were added)
 
 ![LicenseMappingExample](images/LicenseMappingExample.png)
+
+## Mapping EMA Activated ProductName to Autotask Services
+
+note: this is only used for Invoke-EmaSyncCompaniesExperimental
+**Step 1: Getting the EsetProductName**
+1. Log into ESET MSP Administrator
+2. Open a company
+3. Go to "Activated Units"
+4. Find the relevant ProductName(s) that you want to map: 
+
+
+![EmaLicenseProductCode](images/EMA_ActivatedDevices_ProductName.png)
+
+3. in our case it is "ESET Endpoint Security for Windows"
+
+**Step 2: Getting the AutotaskServiceId**
+1. run autotask-getServices
+2. find the AutotaskServiceId for the service you want to map:
+
+![AutotaskServiceId](images/autotaskServiceId.png)
+
+3. in our case it is 11
+
+**Step 3: Creating the mapping**
+1. open mappings.json and use the information from previous steps to create the mapping
+2. Example (highlighted lines were added)
+
+![ProductServiceMappingExample](images/ProductServiceMappingsExample.png)

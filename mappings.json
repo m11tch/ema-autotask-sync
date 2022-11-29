@@ -22,7 +22,7 @@
     "ProductServiceMappings" : [
         {
             "EsetProductName": "ESET Endpoint Security for Windows",
-            "AutotaskServiceId": 16
+            "AutotaskServiceId": 11
         },
         {
             "EsetProductName": "ESET Inspect",
