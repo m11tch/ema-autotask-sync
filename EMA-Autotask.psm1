@@ -151,7 +151,7 @@ function Get-autotaskContractServiceUnits {
     "Secret" = "$AutotaskSecret"
     "apiIntegrationCode" = "$AutotaskApiIntegrationCode"
     }
-    
+    $CurrentDateTime = Get-Date (Get-Date).ToUniversalTime() -Format "o"
 $Body = @{
     search = @"
     {
@@ -166,6 +166,11 @@ $Body = @{
                 "field":"ServiceID",
                 "op":"eq",
                 "value":$ServiceID               
+            },
+            {
+                "field":"endDate",
+                "op":"gt",
+                "value": "$CurrentDateTime"
             }
         ]
     }
