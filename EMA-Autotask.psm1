@@ -25,7 +25,6 @@ function Set-autotaskContractServiceadjustments {
     
     Invoke-restMethod -Method Post -Headers $Headers -Body $Body -uri $autotaskBaseUri/aTServicesRest/V1.0/contractServiceAdjustments -contentType 'application/json'
     
-
 }
 
 function Get-autotaskCompanies {
@@ -132,10 +131,10 @@ $AutotaskServices= Invoke-restMethod -Method Get -Headers $Headers -Uri $autotas
 #Loop through the services
 
 Write-Host("Printing services:")
-foreach ($AutotaskService in $AutotaskServices.items){
-    Write-Host("serviceId: " + $AutotaskService.Id + " serviceName: " + $AutotaskService.name )  
+    foreach ($AutotaskService in $AutotaskServices.items){
+        Write-Host("serviceId: " + $AutotaskService.Id + " serviceName: " + $AutotaskService.name )  
 
-}
+    }
 }
 
 function Get-autotaskContractServiceUnits {
@@ -151,7 +150,7 @@ function Get-autotaskContractServiceUnits {
     "Secret" = "$AutotaskSecret"
     "apiIntegrationCode" = "$AutotaskApiIntegrationCode"
     }
-    $CurrentDateTime = Get-Date (Get-Date).ToUniversalTime() -Format "o"
+    $CurrentDateTime = Get-Date -Format o -asUTC
 $Body = @{
     search = @"
     {
@@ -245,7 +244,6 @@ function Get-EmaCompanyLicenses {
 
     $LicensesResponse = Invoke-restMethod -Uri 'https://mspapi.eset.com/api/Search/Licenses' -method Post -Headers $Headers -Body $Body -contentType 'application/json'
     $PublicLicenseId = $LicensesResponse.Search.publicLicenseKey
-
     return $PublicLicenseId
 }
 
@@ -255,7 +253,7 @@ function Get-EmaLicenseDetails {
     )
     $Body = @"
     {
-        "publicLicenseKey": "$PublicId"
+        "publicLicenseKey": "$PublicLicenseKey"
     } 
 "@
     Write-Debug($body)
@@ -270,60 +268,73 @@ function Invoke-EmaSyncCompanies {
     $Companies = Get-EmaCompanies -MasterCompanyId (Get-EmaMasterCompanyID)
 
     foreach ($Company in $Companies) {
+        $CompanyPublicId = $Company.publicId
         #Get Activated Devices from companies
+
+        #Find Autotask Contract for this company
+        $ContractID = $Mappings.companyMappings | Where-Object -Property "emaCompanyPublicId" -eq "$companyPublicId"
         Write-Host("used seats for Customer: " + $Company.name + " company ID: " + $company.publicId) -foregroundColor Green
+        #create hashtable to store counts in for later usage
+        $ActivatedDevicesPerServiceCount = @{}
 
-        foreach ($PublicId in (Get-EmaCompanyLicenses -CompanyPublicId $Company.publicId)) {
-            $LicenseDetails = (Get-EmaLicenseDetails -PublicLicenseKey $PublicId)
-            Write-Host($LicenseDetails.productName + " - " + $LicenseDetails.publicLicenseKey + " seats:" + $LicenseDetails.usage + " productCode: " + $LicenseDetails.productCode)
+        if ($null -ne $ContractID) {
+            foreach ($PublicId in (Get-EmaCompanyLicenses -CompanyPublicId $Company.publicId)) {
 
-            #Find Autotask Contract for this company
-            $ContractID = $Mappings.companyMappings | Where-Object -Property "emaCompanyPublicId" -eq "$companyPublicId"
-            #$ContractID
-            if ($null -ne $ContractID) {
-                #Find Autotask Service ID for current license 
-                $serviceID = $Mappings.licenseProductMappings | Where-Object -Property "emaLicenseProductCode" -eq $LicenseDetails.productCode
+                $LicenseDetails = (Get-EmaLicenseDetails -PublicLicenseKey $PublicId)
+                Write-Host($LicenseDetails.productName + " - " + $LicenseDetails.publicLicenseKey + " seats:" + $LicenseDetails.usage + " productCode: " + $LicenseDetails.productCode)
 
-                if ($null -ne $serviceID) {
-                    Write-Host("Comparing count in autoTask") -foregroundColor Cyan
-                    $AutotaskUnits = Get-AutotaskContractServiceUnits -ContractID $ContractID.AutoTaskContractID -serviceID $ServiceID.autotaskServiceId
-                    #Write-Host("ContractID: " + $ContractID + " serviceId: " + $serviceID)
-                    #$AutotaskUnits.units
-                    if ($null -ne $AutotaskUnits) {
-                        $Adjustment = ($LicenseDetails.usage - $AutotaskUnits.units)
-                        if ($LicenseDetails.usage -gt $AutotaskUnits.units){
-                            Write-Host("ESET Count higher than Autotask, adjustment to make: " + $Adjustment)
-                            if (!$DryRun) {
-                                Write-Host("Making Adjustment in autotask") -foregroundColor Green
-                                Set-AutotaskContractServiceadjustments -ServiceID $ServiceID.autotaskServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
-                            }
+                #$ContractID
+                
+                    #Find Autotask Service ID for current license 
+                    $serviceID = $Mappings.licenseProductMappings | Where-Object -Property "emaLicenseProductCode" -eq $LicenseDetails.productCode
 
-                        } 
-                        if ($LicenseDetails.usage -lt $AutotaskUnits.units) {
-                            Write-Host("ESET Count lower than Autotask, adjustment to make: " + $Adjustment)
-                            if (!$DryRun) {
-                                if ($AutotaskUnits.units -eq 1) {
-                                    Write-Host("AutotaskCount cannot be 0, skipping") -foregroundColor darkRed
-                                } else {
-                                    write-Host("Making adjustment in autotask") -foregroundColor Green
-                                    Set-AutotaskContractServiceadjustments -ServiceID $ServiceID.autotaskServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
-                                
-                                }
-                            }
-
-                        }
-                        if ($LicenseDetails.usage -eq $AutotaskUnits.units) {
-                            Write-Host("ESET Count matches Autotask Count, no update needed")
-                        }
+                    if ($null -ne $serviceID) {
+                        #Store ESET license usage in hashtable
+                        $AutotaskServiceId = $ServiceID.autotaskServiceId
+                        $ActivatedDevicesPerServiceCount.$AutotaskServiceId += $LicenseDetails.usage
                     } else { 
-                        Write-Error("failed to get data from Autotask")
+                        Write-Host("License not mapped to any service") -foregroundColor darkYellow
                     }
-                } else { 
-                    Write-Host("License not mapped to any service") -foregroundColor darkYellow
                 }
-            } else {
-                Write-Host("Company not mapped") -foregroundColor darkYellow
-            }           
+        } else {
+            Write-Host("Company not mapped") -foregroundColor darkYellow
+        }           
+
+        foreach ($ServiceId in $ActivatedDevicesPerServiceCount.Keys) {
+            Write-Host("Comparing count in Autotask") -foregroundColor Cyan
+            $AutotaskUnits = Get-AutotaskContractServiceUnits -ContractID $ContractID.AutoTaskContractID -serviceID $ServiceId
+            #Write-Host("ContractID: " + $ContractID + " serviceId: " + $serviceID)
+            #$AutotaskUnits.units
+            if ($null -ne $AutotaskUnits) {
+
+                $Adjustment = ($ActivatedDevicesPerServiceCount[$ServiceId] - $AutotaskUnits.units)
+                if ($LicenseDetails.usage -gt $AutotaskUnits.units){
+                    Write-Host("ESET Count higher than Autotask, adjustment to make: " + $Adjustment)
+                    if (!$DryRun) {
+                        Write-Host("Making Adjustment in autotask") -foregroundColor Green
+                        Set-AutotaskContractServiceadjustments -ServiceID $ServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
+                    }
+
+                } 
+                if ($ActivatedDevicesPerServiceCount[$ServiceId] -lt $AutotaskUnits.units) {
+                    Write-Host("ESET Count lower than Autotask, adjustment to make: " + $Adjustment)
+                    if (!$DryRun) {
+                        if ($AutotaskUnits.units -eq 1) {
+                            Write-Host("AutotaskCount cannot be 0, skipping") -foregroundColor darkRed
+                        } else {
+                            write-Host("Making adjustment in autotask") -foregroundColor Green
+                            Set-AutotaskContractServiceadjustments -ServiceID $ServiceId -ContractID $ContractID.autoTaskContractID -unitChange $Adjustment
+                        
+                        }
+                    }
+
+                }
+                if ($ActivatedDevicesPerServiceCount[$ServiceId] -eq $AutotaskUnits.units) {
+                    Write-Host("ESET Count matches Autotask Count, no update needed")
+                }
+            } else { 
+                Write-Error("failed to get data from Autotask")
+            }
         }
     }
 }
@@ -495,7 +506,7 @@ Function Get-MSPActivatedDevices {
         "Content-Type" = "application/json"
     }
     $ActivatedDevicesReq = Invoke-RestMethod -Uri "https://msp.eset.com/api/seats/search" -Method Post -Headers $Headers -WebSession $MSPWebSession -Body $ActivatedDevicesBody
-    $ActivatedDevicesReq.Units.Applications
+    return $ActivatedDevicesReq.Units.Applications
 }
 
 
